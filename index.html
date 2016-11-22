@@ -229,7 +229,7 @@ d3.csv('flights-3m.json', function(error, flights) {
       .x(d3.scaleTime()
         .domain([new Date(2001, 0, 1), new Date(2001, 3, 1)])
         .rangeRound([0, 10 * 90]))
-      .filter([new Date(2001, 1, 1), new Date(2001, 2, 1)])
+      //.filter([new Date(2001, 1, 1), new Date(2001, 2, 1)]) // can only filter after creation
   ];
   // Given our array of charts, which we assume are in the same order as the
   // .chart elements in the DOM, bind the charts to the DOM and render them.
@@ -243,6 +243,7 @@ d3.csv('flights-3m.json', function(error, flights) {
   // Render the total.
   d3.selectAll('#total')
       .text(formatNumber(flight.size()));
+  charts[3].filter([new Date(2001, 1, 1), new Date(2001, 2, 1)]);
   renderAll();
   // Renders the specified chart or list.
   function render(method) {
@@ -356,7 +357,6 @@ d3.csv('flights-3m.json', function(error, flights) {
             .extent([[0,0], [width,height-1]])
             .on('brush end', brushmoved)
             .on('start', brushstart); 
-           // .on('end', brushend); // A RETIRER
           gBrush = g.selectAll('.brush')
               .data([x.domain()])
             .enter()
@@ -368,8 +368,7 @@ d3.csv('flights-3m.json', function(error, flights) {
               .enter()
                 .append('path') 
                 .classed('handle--custom', true)
-                .attr('cursor', 'ew-resize')
-                //.attr('display','none') // initially hidden      
+                .attr('cursor', 'ew-resize')  
                 .attr('d', resizePath);
           gBrush
             .call(brush.move, [0,0]);   
@@ -390,17 +389,19 @@ d3.csv('flights-3m.json', function(error, flights) {
         var handles = d3.select(this).selectAll('.handle--custom');
         if (s == null) {
           handles.attr('display', 'none');
-          var g = d3.select(gBrush.node().parentNode);
+          var g = d3.select(gBrush.node().parentNode.parentNode.parentNode);
           g.select('.title a').style('display', 'none');
           g.select('#clip-' + id + ' rect').attr('x', null).attr('width', '100%');
           dimension.filterAll();
+          renderAll();
         } 
         else {
+          var g = d3.select(gBrush.node().parentNode.parentNode.parentNode);
           var extent = s.map(x.invert);
           handles
             .attr('display', null)
             .attr('transform', function(d, i) { return 'translate(' + s[i] + ', 0)'; });
-          d3.select(this.parentNode).select('#clip-' + id + ' rect')
+          g.select('#clip-' + id + ' rect')
               .attr('x', x(extent[0]))
               .attr('width', x(extent[1]) - x(extent[0]));
           dimension.filterRange(extent);
@@ -458,6 +459,7 @@ d3.csv('flights-3m.json', function(error, flights) {
     };
     chart.filter = function(_) {
       if (_) {
+        brush.move(gBrush, _.map(x));
         dimension.filterRange(_);
       } else {
         brush.move(gBrush, null);
