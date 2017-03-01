@@ -122,8 +122,9 @@ aside {
 </style>
 
 <div id='body'>
-
+<!--
 <a href='https://github.com/square'><img src='logotype.png' width='122' height='31'></a>
+-->
 
 <h1>Crossfilter</h1>
 
@@ -243,7 +244,7 @@ d3.csv('flights-3m.json', function(error, flights) {
   // Render the total.
   d3.selectAll('#total')
       .text(formatNumber(flight.size()));
-  charts[3].filter([new Date(2001, 1, 1), new Date(2001, 2, 1)]);
+  //charts[3].filter([new Date(2001, 1, 1), new Date(2001, 2, 1)]);
   renderAll();
   // Renders the specified chart or list.
   function render(method) {
